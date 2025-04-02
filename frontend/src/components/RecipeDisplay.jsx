@@ -1,26 +1,56 @@
 import { useLocation } from "react-router-dom";
 import axios from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
 export default function RecipeDisplay() {
+  
   const location = useLocation();
   const recipe = location.state?.recipe;
   const [message, setMessage] = useState("");
 
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    console.log("Fetched Recipe Data:", recipe);
+  }, [recipe]);
+
   if (!recipe) {
-    return <div className="text-center text-red-500">No recipe found.</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-900 text-red-500 text-2xl font-semibold">
+        No recipe found.
+      </div>
+    );
   }
 
   const handleSaveRecipe = async () => {
+    setLoading(true);
+    const token = localStorage.getItem("token");
+  
+    if (!token) {
+      setMessage("You must be logged in to save recipes.");
+      setLoading(false);
+      return;
+    }
     try {
-      const response = await axios.post("http://localhost:5000/api/recipes/save", recipe);
+      const response = await axios.post(
+        "https://mentor-project.onrender.com/api/recipes/save",
+        { recipe }, 
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
       setMessage(response.data.message || "Recipe saved successfully!");
     } catch (error) {
-      console.error("Error saving recipe:", error);
-      setMessage("Failed to save recipe.");
+      setMessage(error.response?.data?.message || "Failed to save recipe.");
+    } finally {
+      setLoading(false);
     }
   };
+  
 
   return (
     <div className="min-h-screen flex items-center justify-center  bg-black relative overflow-hidden text-white">
@@ -38,28 +68,22 @@ export default function RecipeDisplay() {
         
         <h3 className="text-xl font-semibold mb-2">Ingredients:</h3>
         <ul className="list-disc list-inside mb-4">
-          {recipe.ingredients?.map((ingredient, index) => (
-            <li key={index}>
-              {ingredient.item || ingredient.name || "Unknown"} - {ingredient.quantity || "N/A"}
-            </li>
-          ))}
+        {recipe.ingredients?.map((ingredient, index) => (
+              <li key={index}>
+                {ingredient.name} - {ingredient.quantity}{" "}
+                {ingredient.preparation ? `(${ingredient.preparation})` : ""}
+              </li>))}
         </ul>
 
-        {/* Instructions Section */}
-        <h3 className="text-xl font-semibold mb-2">Instructions:</h3>
+        <h3 className="text-xl relative  font-semibold mb-2">Instructions:</h3>
         <ol className="list-decimal list-inside text-gray-400 space-y-2">
-          {recipe.instructions?.length > 0 ? (
-            recipe.instructions.map((step, index) => (
+            {recipe.instructions?.map((instruction, index) => (
               <li key={index}>
-                {typeof step === "string" ? step : step.step || "Step missing"}
+                <strong>Step {instruction.step}:</strong> {instruction.description}
               </li>
-            ))
-          ) : (
-            <p>No instructions available.</p>
-          )}
-        </ol>
+            ))}
+          </ol>
 
-        {/* Additional Recipe Info */}
         <p className="mt-4 text-gray-400">
           <strong>Cooking Time:</strong> {recipe.cooking_time || "N/A"}
         </p>
@@ -67,14 +91,25 @@ export default function RecipeDisplay() {
           <strong>Serving Size:</strong> {recipe.serving_size || "N/A"}
         </p>
 
-        {/* Save Recipe Button */}
         <button
           onClick={handleSaveRecipe}
           className="mt-4 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition transform hover:scale-105"
         >
-          Save Recipe
+           {loading ? (
+              <span className="animate-spin h-6 w-6 border-b-2 border-white"></span>
+            ) : (
+              "Save Recipe"
+            )} 
         </button>
-        {message && <p className="text-blue-400 mt-2">{message}</p>}
+        {message && (
+            <p
+              className={`mt-3 text-center text-lg ${
+                message.includes("Failed") ? "text-red-500" : "text-blue-400"
+              }`}
+            >
+              {message}
+            </p>
+          )}
       </motion.div>
     </div>
   );

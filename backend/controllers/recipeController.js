@@ -35,12 +35,13 @@ const generateRecipe = async (req, res) => {
         const result = await model.generateContent({
             contents: [{ role: "user", parts: [{ text: prompt }] }],
         });
-
+        
         if (!result?.response?.candidates || result.response.candidates.length === 0) {
             throw new Error("Invalid response from Gemini API");
         }
 
         const responseText = result.response.candidates[0]?.content?.parts?.[0]?.text || "";
+       
         if (!responseText) {
             throw new Error("Empty response from Gemini API");
         }
@@ -55,23 +56,48 @@ const generateRecipe = async (req, res) => {
     }
 };
 
+// Adjust path as needed
+
 const saveRecipe = async (req, res) => {
     try {
         const { title, ingredients, instructions, cuisine, dietaryPreferences, userId } = req.body;
+
+        console.log("Incoming Recipe Data:", req.body); // Debugging
 
         if (!title || !ingredients || !instructions || !userId) {
             return res.status(400).json({ message: "All fields are required" });
         }
 
-        const newRecipe = new Recipe({ title, ingredients, instructions, cuisine, dietaryPreferences, userId });
-        await newRecipe.save();
+        // Validate userId format
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            return res.status(400).json({ message: "Invalid user ID" });
+        }
 
+        // Ensure ingredients and instructions are properly formatted
+        const ingredientsArray = Array.isArray(ingredients) ? ingredients : JSON.parse(ingredients);
+        const instructionsArray = Array.isArray(instructions) ? instructions : JSON.parse(instructions);
+
+        // Create and save new recipe
+        const newRecipe = new Recipe({ 
+            title, 
+            ingredients: ingredientsArray, 
+            instructions: instructionsArray, 
+            cuisine, 
+            dietaryPreferences, 
+            userId 
+        });
+
+        await newRecipe.save();
         res.status(201).json({ message: "Recipe saved successfully", recipe: newRecipe });
+
     } catch (error) {
         console.error("Error saving recipe:", error);
-        res.status(500).json({ message: "Failed to save recipe" });
+        res.status(500).json({ message: "Failed to save recipe", error: error.message });
     }
 };
+
+module.exports = { saveRecipe };
+
 
 const getSavedRecipes = async (req, res) => {
     try {
