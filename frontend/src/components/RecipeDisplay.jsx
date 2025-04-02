@@ -34,7 +34,7 @@ export default function RecipeDisplay() {
     }
     try {
       const response = await axios.post(
-        "https://mentor-project.onrender.com/api/recipes/save",
+        "https://recipe-generator-jwik.onrender.com/api/recipes/save",
         { recipe }, 
         {
           headers: {

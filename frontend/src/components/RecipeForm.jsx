@@ -14,14 +14,13 @@ export default function RecipeForm() {
     e.preventDefault();
     setError(null);
 
-    // Ensure ingredients are provided
     if (!ingredients.trim()) {
       setError("Please provide some ingredients.");
       return;
     }
 
     try {
-      const response = await axios.post("http://localhost:5000/api/recipes/generate", {
+      const response = await axios.post("https://recipe-generator-jwik.onrender.com/api/recipes/generate", {
         ingredients: ingredients.split(",").map((item) => item.trim()),
         cuisine,
         dietaryPreferences,

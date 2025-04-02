@@ -12,7 +12,7 @@ export default function SavedRecipes() {
   const fetchSavedRecipes = async () => {
     try {
       const userId = "YOUR_USER_ID";
-      const response = await axios.get(`http://localhost:5000/api/recipes/saved/${userId}`);
+      const response = await axios.get(`https://recipe-generator-jwik.onrender.com/api/recipes/saved/${userId}`);
       setRecipes(response.data.recipes);
     } catch (error) {
       console.error("Error fetching saved recipes:", error.response?.data || error.message);
@@ -21,7 +21,7 @@ export default function SavedRecipes() {
 
   const handleDeleteRecipe = async (recipeId) => {
     try {
-      await axios.delete(`http://localhost:5000/api/recipes/delete/${recipeId}`);
+      await axios.delete(`https://recipe-generator-jwik.onrender.com/api/recipes/delete/${recipeId}`);
       setRecipes((prevRecipes) => prevRecipes.filter((recipe) => recipe._id !== recipeId));
     } catch (error) {
       console.error("Error deleting recipe:", error);

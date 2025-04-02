@@ -5,7 +5,7 @@ import Navbar from "../components/Navbar";
 export default function Home() {
   const handleLogout = async () => {
     try {
-      await axios.post("http://localhost:5000/api/logout", {}, { withCredentials: true });
+      await axios.post("https://recipe-generator-jwik.onrender.com/api/logout", {}, { withCredentials: true });
 
       localStorage.removeItem("token");
 

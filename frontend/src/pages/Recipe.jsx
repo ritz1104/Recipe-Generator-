@@ -13,7 +13,7 @@ export default function RecipeForm() {
     setError(null); // Reset error before request
 
     try {
-      const response = await axios.post("http://localhost:5000/api/recipes/generate", {
+      const response = await axios.post("https://recipe-generator-jwik.onrender.com/api/recipes/generate", {
         ingredients: ingredients.split(",").map((item) => item.trim()),
         cuisine,
         dietaryPreferences,

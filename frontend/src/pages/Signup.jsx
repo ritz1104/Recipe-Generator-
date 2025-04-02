@@ -13,7 +13,7 @@ export default function Signup() {
   const handleSignup = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:5000/api/auth/register", { name, email, password });
+      await axios.post("https://recipe-generator-jwik.onrender.com/api/auth/register", { name, email, password });
       navigate("/");
     } catch (error) {
       console.error("Signup failed:", error);
